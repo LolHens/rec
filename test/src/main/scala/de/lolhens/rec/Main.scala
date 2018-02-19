@@ -44,21 +44,72 @@ object Main {
       }
     }
 
-    println(even(500000000L).value)
-    println(test2.run(test2.even(500000000L)))
+    object test3 {
+      def even(i: Long): Boolean = i match {
+        case 0 => true
+        case _ =>
+          odd(i - 1)
+      }
 
-    val time1 = System.currentTimeMillis()
+      def odd(i: Long): Boolean = i match {
+        case 0 => false
+        case _ =>
+          even(i - 1)
+      }
+    }
 
-    println(even(5000000000L).value)
+    if (false) {
+      for (i <- 0 until 10000)
+        test3.even(5000)
 
-    val time2 = System.currentTimeMillis()
-    println(time2 - time1)
+      println(even(500000000L).value)
+      println(test2.run(test2.even(500000000L)))
+    }
 
-    println(test2.run(test2.even(5000000000L)))
+    if (false) {
+      val time0 = System.currentTimeMillis()
 
-    val time3 = System.currentTimeMillis()
-    println(time3 - time2)
+      for (i <- 0 until 100000)
+        test3.even(50000)
 
+      val time1 = System.currentTimeMillis()
+      println(time1 - time0)
+
+      println(even(5000000000L).value)
+
+      val time2 = System.currentTimeMillis()
+      println(time2 - time1)
+
+      println(test2.run(test2.even(5000000000L)))
+
+      val time3 = System.currentTimeMillis()
+      println(time3 - time2)
+    }
+
+
+    for (i <- 0 until 10) {
+      println("---")
+
+      val time0 = System.currentTimeMillis()
+
+      for (i <- 0 until 100000)
+        test3.even(5000L)
+
+      val time1 = System.currentTimeMillis()
+      println(time1 - time0)
+
+      for (i <- 0 until 10000)
+        even(50000L).value
+
+      val time2 = System.currentTimeMillis()
+      println(time2 - time1)
+
+      for (i <- 0 until 10000)
+        test2.run(test2.even(50000L))
+
+      val time3 = System.currentTimeMillis()
+      println(time3 - time2)
+    }
     //println("asdf")
   }
 }
