@@ -4,12 +4,12 @@ import scala.annotation.tailrec
 
 object Main {
   def main(args: Array[String]): Unit = {
-    def even(i: Long)(implicit stackLimit: StackLimit.Next = StackLimit.initial): Rec[Boolean] = {
-      val stackLimit$tmp: StackLimit.Next = stackLimit
+    def even(i: Long)(implicit stackLimit: StackDepth.Next = StackDepth.initial): Rec[Boolean] = {
+      val stackLimit$tmp: StackDepth.Next = stackLimit
 
       {
-        val stackLimit: StackLimit.Next = stackLimit$tmp
-        implicit val stackLimit$prev: StackLimit = stackLimit$tmp.stackLimit
+        val stackLimit: StackDepth.Next = stackLimit$tmp
+        implicit val stackLimit$prev: StackDepth = stackLimit$tmp.stackDepth
 
         Rec {
           i match {
@@ -21,12 +21,12 @@ object Main {
       }
     }
 
-    def odd(i: Long)(implicit stackLimit: StackLimit.Next = StackLimit.initial): Rec[Boolean] = {
-      val stackLimit$tmp: StackLimit.Next = stackLimit
+    def odd(i: Long)(implicit stackLimit: StackDepth.Next = StackDepth.initial): Rec[Boolean] = {
+      val stackLimit$tmp: StackDepth.Next = stackLimit
 
       {
-        val stackLimit: StackLimit.Next = stackLimit$tmp
-        implicit val stackLimit$prev: StackLimit = stackLimit$tmp.stackLimit
+        val stackLimit: StackDepth.Next = stackLimit$tmp
+        implicit val stackLimit$prev: StackDepth = stackLimit$tmp.stackDepth
 
         Rec {
           i match {
@@ -68,7 +68,7 @@ object Main {
 
     object test3 {
       @recursive
-      def even(i: Long): Boolean = i match {
+      def even(i: Long)(implicit str: String = ""): Boolean = i match {
         case 0 => true
         case _ =>
           odd(i - 1)
@@ -82,10 +82,40 @@ object Main {
       }
     }
 
-    println(test3.even(5000): Boolean)
-    println(test3.odd(5000): Boolean)
-    println(test3.even(5001): Boolean)
-    println(test3.odd(5001): Boolean)
+    object test4 {
+      /*def even(i: Long): Boolean = ???
+
+      def evenRec(i: Long, stack: Int): Rec[Boolean] = i match {
+        case 0 => true
+        case _ =>
+          odd(i - 1)
+      }
+
+      def evenS(i: Long): Boolean = i match {
+        case 0 => true
+        case _ =>
+          odd(i - 1)
+      }
+
+      def odd(i: Long): Boolean = ???
+
+      def oddRec(i: Long, stack: Int): Rec[Boolean] = i match {
+        case 0 => false
+        case _ =>
+          evenRec(i - 1)
+      }
+
+      def oddS(i: Long): Boolean = i match {
+        case 0 => false
+        case _ =>
+          even(i - 1)
+      }*/
+    }
+
+    println(test3.even(5000))
+    println(test3.odd(5000))
+    println(test3.even(5001))
+    println(test3.odd(5001))
 
     println("---")
 

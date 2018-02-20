@@ -18,7 +18,7 @@ object Rec {
 
   def defer[A](f: => Rec[A]): Rec[A] = new Rec(new Deferred(f))
 
-  def apply[A](rec: => Rec[A])(implicit stackLimit: StackLimit): Rec[A] = macro RecMacro.applyImpl[A]
+  def apply[A](rec: => Rec[A])(implicit stackDepth: StackDepth): Rec[A] = macro RecMacro.applyImpl[A]
 
   implicit def implicitNow[A](value: A): Rec[A] = now(value)
 

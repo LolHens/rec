@@ -3,12 +3,12 @@ package de.lolhens.rec
 import scala.reflect.macros.{blackbox, whitebox}
 
 object RecMacro {
-  def applyImpl[A](c: blackbox.Context)(rec: c.Tree)(stackLimit: c.Expr[StackLimit]): c.Expr[Rec[A]] = {
+  def applyImpl[A](c: blackbox.Context)(rec: c.Tree)(stackDepth: c.Expr[StackDepth]): c.Expr[Rec[A]] = {
     import c.universe._
 
     c.Expr(
       q"""
-         if ($stackLimit.isReached)
+         if ($stackDepth.isReached)
            de.lolhens.rec.Rec.defer {
              $rec
            }
@@ -26,16 +26,26 @@ object RecMacro {
     val result = {
       annottees.map(_.tree).toList match {
         case q"$mods def $methodName[..$tpes](...$args): $returnType = { ..$body }" :: Nil =>
-          q"""$mods def $methodName[..$tpes](...$args)(implicit stackLimit: de.lolhens.rec.StackLimit.Next = de.lolhens.rec.StackLimit.initial): de.lolhens.rec.Rec[$returnType] = {
-            val stackLimit_tmp: StackLimit.Next = stackLimit
+          q"""$mods def $methodName[..$tpes](...$args)(implicit nextStackDepth: de.lolhens.rec.StackDepth.Next = de.lolhens.rec.StackDepth.initial): de.lolhens.rec.Rec[$returnType] = {
+            val nextStackDepth_tmp: de.lolhens.rec.StackDepth.Next = nextStackDepth
 
             {
-              val stackLimit: StackLimit.Next = stackLimit_tmp
-              implicit val stackLimit_prev: StackLimit = stackLimit_tmp.stackLimit
+              val nextStackDepth: de.lolhens.rec.StackDepth.Next = nextStackDepth_tmp
+              val stackDepth: de.lolhens.rec.StackDepth = nextStackDepth_tmp.stackDepth
 
-              Rec {
-                ..$body
+              val result = if (stackDepth.isReached) {
+                implicit val stackDepth_empty: de.lolhens.rec.StackDepth.Next = stackDepth.reset
+                de.lolhens.rec.Rec.defer {
+                  ..$body
+                }
+              } else {
+                implicit val stackDepth_empty: de.lolhens.rec.StackDepth.Next = stackDepth.next
+                de.lolhens.rec.Rec.eval {
+                  ..$body
+                }
               }
+
+              result
             }
           }"""
 
