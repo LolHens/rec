@@ -20,13 +20,11 @@ lazy val settings = Seq(
 lazy val root = project.in(file("."))
   .settings(settings: _*)
   .settings(publishArtifact := false)
-  .aggregate(macros)
+  .aggregate(test)
 
 lazy val base = project.in(file("base"))
-
-lazy val macros = project.in(file("macros"))
   .settings(settings: _*)
-  .dependsOn(base)
 
 lazy val test = project.in(file("test"))
-  .dependsOn(macros)
+  .settings(settings: _*)
+  .dependsOn(base)

@@ -4,16 +4,38 @@ import scala.annotation.tailrec
 
 object Main {
   def main(args: Array[String]): Unit = {
-    def even(i: Long)(implicit stackLimit: StackLimit = StackLimit.initial): Rec[Boolean] = i match {
-      case 0 => Rec.now(true)
-      case _ =>
-        Rec(odd(i - 1)(stackLimit.next))
+    def even(i: Long)(implicit stackLimit: StackLimit.Next = StackLimit.initial): Rec[Boolean] = {
+      val stackLimit$tmp: StackLimit.Next = stackLimit
+
+      {
+        val stackLimit: StackLimit.Next = stackLimit$tmp
+        implicit val stackLimit$prev: StackLimit = stackLimit$tmp.stackLimit
+
+        Rec {
+          i match {
+            case 0 => Rec.now(true)
+            case _ =>
+              odd(i - 1)
+          }
+        }(stackLimit$prev)
+      }
     }
 
-    def odd(i: Long)(implicit stackLimit: StackLimit = StackLimit.initial): Rec[Boolean] = i match {
-      case 0 => Rec.now(false)
-      case _ =>
-        Rec(even(i - 1)(stackLimit.next))
+    def odd(i: Long)(implicit stackLimit: StackLimit.Next = StackLimit.initial): Rec[Boolean] = {
+      val stackLimit$tmp: StackLimit.Next = stackLimit
+
+      {
+        val stackLimit: StackLimit.Next = stackLimit$tmp
+        implicit val stackLimit$prev: StackLimit = stackLimit$tmp.stackLimit
+
+        Rec {
+          i match {
+            case 0 => Rec.now(false)
+            case _ =>
+              even(i - 1)
+          }
+        }(stackLimit$prev)
+      }
     }
 
     object test2 {
@@ -45,12 +67,14 @@ object Main {
     }
 
     object test3 {
+      @recursive
       def even(i: Long): Boolean = i match {
         case 0 => true
         case _ =>
           odd(i - 1)
       }
 
+      @recursive
       def odd(i: Long): Boolean = i match {
         case 0 => false
         case _ =>
@@ -58,9 +82,16 @@ object Main {
       }
     }
 
+    println(test3.even(5000): Boolean)
+    println(test3.odd(5000): Boolean)
+    println(test3.even(5001): Boolean)
+    println(test3.odd(5001): Boolean)
+
+    println("---")
+
     if (true) {
-      for (i <- 0 until 10000)
-        test3.even(5000)
+      for (i <- 0 until 1)
+        test3.even(5000*1000): Boolean
 
       println(even(500000000L).value)
       println(test2.run(test2.even(500000000L)))
@@ -93,7 +124,7 @@ object Main {
       val time0 = System.currentTimeMillis()
 
       for (i <- 0 until 100000)
-        test3.even(5000L)
+        test3.even(5000L): Boolean
 
       val time1 = System.currentTimeMillis()
       println(time1 - time0)
