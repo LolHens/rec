@@ -58,7 +58,7 @@ object Main {
       }
     }
 
-    if (false) {
+    if (true) {
       for (i <- 0 until 10000)
         test3.even(5000)
 
